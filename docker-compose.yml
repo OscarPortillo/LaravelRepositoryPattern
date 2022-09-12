@@ -1,0 +1,56 @@
+version: "3"
+services:
+    www:
+        build: .
+        container_name: repositoryPatern_php
+        user:
+            1000:1000
+        ports:
+            - "8001:80"
+        volumes:
+            - ./:/var/www/html/
+        links:
+            - db
+        networks:
+            - default
+    db:
+        image: mysql:latest
+        container_name: repositoryPatern_db
+        command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--default-authentication-plugin=mysql_native_password']
+        ports:
+            - "3307:3307"
+        environment:
+            MYSQL_DATABASE: laravel
+            MYSQL_USER: admin
+            MYSQL_PASSWORD: admin
+            MYSQL_ROOT_PASSWORD: admin
+        volumes:
+            - ./dump:/docker-entrypoint-initdb.d
+            - persistent:/var/lib/mysql
+        networks:
+            - default
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        container_name: repositoryPatern_phpmyadmin
+        links:
+            - db:db
+        ports:
+            - 8000:80
+        environment:
+            MYSQL_USER: admin
+            MYSQL_PASSWORD: admin
+            MYSQL_ROOT_PASSWORD: admin
+        networks:
+            - default
+    mailcatcher:
+        image: schickling/mailcatcher
+        container_name: repositoryPatern_mailcatcher
+        ports:
+            - '1081:1081'
+            - '1025:1025'
+volumes:
+    persistent:
+
+networks:
+    default:
+        driver: bridge
